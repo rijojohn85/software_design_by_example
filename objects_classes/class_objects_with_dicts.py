@@ -1,6 +1,10 @@
 import math
 
 
+def make(cls, *args):
+    return cls["_new"](*args)
+
+
 def shape_density(thing, weight):
     return weight / call(thing, "area")
 
@@ -9,11 +13,16 @@ def shape_larger(thing, size):
     return call(thing, "area") > size
 
 
+def shape_new(name):
+    return {"name": name, "_class": Shape}
+
+
 Shape = {
     "density": shape_density,
     "larger": shape_larger,
     "_classname": "Shape",
     "_parent": None,
+    "_new": shape_new,
 }
 
 
@@ -25,16 +34,17 @@ def square_area(thing):
     return thing["side"] ** 2
 
 
+def square_new(name, side):
+    return make(Shape, name) | {"side": side, "_class": Square}
+
+
 Square = {
     "perimeter": square_perimeter,
     "area": square_area,
     "_classname": "Square",
     "_parent": Shape,
+    "_new": square_new,
 }
-
-
-def square_new(name, side):
-    return {"name": name, "side": side, "_class": Square}
 
 
 def circle_perimeter(thing):
@@ -45,21 +55,22 @@ def circle_area(thing):
     return math.pi * (thing["radius"] ** 2)
 
 
+def circle_new(name, radius):
+    return make(Shape, name) | {"radius": radius, "_class": Circle}
+
+
 Circle = {
     "perimeter": circle_perimeter,
     "area": circle_area,
     "_classname": "Circle",
     "_parent": Shape,
+    "_new": circle_new,
 }
 
 
-def circle_new(name, radius):
-    return {"name": name, "radius": radius, "_class": Circle}
-
-
-def call(thing, method_name, *args):
+def call(thing, method_name, *args, **kwargs):
     method = find(thing["_class"], method_name)
-    return method(thing, *args)
+    return method(thing, *args, **kwargs)
 
 
 def find(cls, method_name):
@@ -70,7 +81,7 @@ def find(cls, method_name):
     raise NotImplementedError(method_name)
 
 
-examples = [square_new("sq", 3), circle_new("ci", 2)]
+examples = [make(Square, "sq", 3), make(Circle, "ci", 2)]
 
 for ex in examples:
     n = ex["name"]
