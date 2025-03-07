@@ -19,3 +19,14 @@ class Null(Match):
 
     def _match(self, text: str, start: int) -> int:
         return start
+
+
+class CommonMatch(Match):
+    """
+    since both Range and Char set have the same _match function
+    """
+
+    def _match(self, text: str, start: int) -> Optional[int]:
+        if text[start] not in self.char_set:  # type: ignore
+            return None
+        return self.rest._match(text, start=start + 1)
